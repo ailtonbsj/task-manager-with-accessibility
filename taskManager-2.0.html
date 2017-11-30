@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Aplicativo Gerenciador de Tarefas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style media="screen">
+* {
+  box-sizing: border-box;
+}
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+[class*="col-"] {
+    float: left;
+    padding: 15px;
+}
+/* For mobile phones: */
+[class*="col-"] {
+    width: 100%;
+}
+@media only screen and (min-width: 600px) {
+    /* For tablets: */
+    .col-m-1 {width: 8.33%;}
+    .col-m-2 {width: 16.66%;}
+    .col-m-3 {width: 25%;}
+    .col-m-4 {width: 33.33%;}
+    .col-m-5 {width: 41.66%;}
+    .col-m-6 {width: 50%;}
+    .col-m-7 {width: 58.33%;}
+    .col-m-8 {width: 66.66%;}
+    .col-m-9 {width: 75%;}
+    .col-m-10 {width: 83.33%;}
+    .col-m-11 {width: 91.66%;}
+    .col-m-12 {width: 100%;}
+}
+@media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+}
+
+.menu {
+  border: 1px solid red;
+  font-family: sans-serif;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.item {
+  border: 1px solid green;
+  margin: 5px;
+}
+.winPrompt {
+  border: 1px solid green;
+  padding: 10px;
+  margin-bottom: 5px;
+  display: none;
+}
+
+.success {
+  background-color: green;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: none;
+}
+  </style>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <div class="row">
+    <a id="newTask" class="col-2 menu" href="#">Nova Tarefa</a>
+    <div class="col-8">&nbsp;</div>
+  </div>
+
+  <div class="row winPrompt">
+    <label for="" class="col-12">Digite uma descrição:</label>
+    <textarea id="descricao" class="col-12" title="Digite uma descrição"></textarea>
+    <div class="col-10"></div>
+    <div class="col-2">
+      <button id="btnConfirmar" type="button">Confirmar</button>
+    </div>
+  </div>
+
+  <div class="row success">
+    <div id="txt-success" class="col-11">
+    </div>
+    <a id="btn-success" href="#" class="col-1">&nbsp;</a>
+  </div>
+
+  <div class="row menu">
+    <div id="panelTask" class="col-12">
+    </div>
+  </div>
+
+  <template id="tmpItem">
+    <div class="row item">
+      <a class="col-10 texto" href="#">Anotacao um </a>
+      <div class="col-2"><button class="btn-remove">Remover</button></div>
+    </div>
+  </template>
+  <script type="text/javascript">
+    var btnNewTask = $('#newTask');
+    var btnDelTask =$('#delTask');
+    var pnTask = $('#panelTask');
+    var tmpItem = $('#tmpItem');
+
+    var listItens = [];
+    var genId = 0;
+
+    var lsGenId = localStorage.getItem("taskListGenId");
+    if(lsGenId != null){
+      genId = JSON.parse(lsGenId);
+      listItens = JSON.parse(localStorage.getItem("taskListItens"));
+      renderItens();
+    }
+
+    btnNewTask.click(function () {
+      $('.winPrompt').show();
+      $('#descricao').val('').focus();
+      //
+      // genId++;
+      // localStorage.setItem("taskListGenId", JSON.stringify(genId));
+      // localStorage.setItem("taskListItens", JSON.stringify(listItens));
+      // renderItens();
+    });
+    $('#btnConfirmar').click(function () {
+      listItens.push({id: genId, text: $('#descricao').val()});
+      genId++;
+      localStorage.setItem("taskListGenId", JSON.stringify(genId));
+      localStorage.setItem("taskListItens", JSON.stringify(listItens));
+      renderItens();
+      $('.winPrompt').hide();
+      showSuccess('Nova tarefa adicionada com sucesso!');
+    });
+
+    function removeItem() {
+      var idDel = $(this).val();
+      for (var item in listItens) {
+        if(listItens[item].id == idDel){
+          listItens.splice(item, 1);
+          break;
+        }
+      }
+      localStorage.setItem("taskListItens", JSON.stringify(listItens));
+      renderItens();
+      showSuccess('Tarefa removida com sucesso!');
+    }
+
+    function showSuccess(msg){
+      $('.success').show();
+      $('#txt-success').html(msg);
+      $('#btn-success').attr('title', msg).focus();
+      setTimeout(function() {
+        $('.success').hide();
+      },2000);
+    }
+
+    function renderItens(){
+      var panel = $(document.createElement('div'));
+      for (var item in listItens) {
+        var tmp = tmpItem[0].content;
+        tmp.querySelector(".texto").innerHTML = 'Tarefa '+listItens[item].id+ ': '+listItens[item].text;
+        tmp.querySelector(".btn-remove").value = listItens[item].id;
+        tmp.querySelector(".btn-remove").setAttribute('title', 'Remover tarefa'+listItens[item].id);
+        panel.append($(tmp).clone());
+      }
+      pnTask.empty();
+      pnTask.append(panel);
+      $('.btn-remove').click(removeItem);
+    }
+  </script>
+</body>
+</html>

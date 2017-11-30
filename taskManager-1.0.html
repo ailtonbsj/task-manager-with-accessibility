@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Aplicativo Gerenciador de Tarefas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style media="screen">
+* {
+  box-sizing: border-box;
+}
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+[class*="col-"] {
+    float: left;
+    padding: 15px;
+}
+/* For mobile phones: */
+[class*="col-"] {
+    width: 100%;
+}
+@media only screen and (min-width: 600px) {
+    /* For tablets: */
+    .col-m-1 {width: 8.33%;}
+    .col-m-2 {width: 16.66%;}
+    .col-m-3 {width: 25%;}
+    .col-m-4 {width: 33.33%;}
+    .col-m-5 {width: 41.66%;}
+    .col-m-6 {width: 50%;}
+    .col-m-7 {width: 58.33%;}
+    .col-m-8 {width: 66.66%;}
+    .col-m-9 {width: 75%;}
+    .col-m-10 {width: 83.33%;}
+    .col-m-11 {width: 91.66%;}
+    .col-m-12 {width: 100%;}
+}
+@media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+}
+
+.menu {
+  border: 1px solid red;
+  font-family: sans-serif;
+  font-weight: bold;
+}
+
+.item {
+  border: 1px solid green;
+  margin: 5px;
+}
+  </style>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <div class="row">
+    <div id="newTask" class="col-2 menu">Nova Tarefa</div>
+    <div id="delTask" class="col-2 menu">Remover Tarefa</div>
+    <div class="col-8">&nbsp;</div>
+  </div>
+  <div class="row menu">
+    <div id="panelTask" class="col-12">
+    </div>
+  </div>
+
+  <template id="tmpItem">
+    <div class="row item">
+      <div class="col-11 texto">Anotacao um </div>
+      <div class="col-1"><input name="marcador" class="marcador" type="radio"></div>
+    </div>
+  </template>
+  <script type="text/javascript">
+    var btnNewTask = $('#newTask');
+    var btnDelTask =$('#delTask');
+    var pnTask = $('#panelTask');
+    var tmpItem = $('#tmpItem');
+
+    var listItens = [];
+    var genId = 0;
+
+    var lsGenId = localStorage.getItem("taskListGenId");
+    if(lsGenId != null){
+      genId = JSON.parse(lsGenId);
+      listItens = JSON.parse(localStorage.getItem("taskListItens"));
+      renderItens();
+    }
+
+    btnNewTask.click(function () {
+      listItens.push({id: genId, text: prompt('Digite uma descrição:')});
+      genId++;
+      localStorage.setItem("taskListGenId", JSON.stringify(genId));
+      localStorage.setItem("taskListItens", JSON.stringify(listItens));
+      renderItens();
+    });
+
+    btnDelTask.click(function () {
+      var idDel = $('.marcador:checked').val();
+      for (var item in listItens) {
+        if(listItens[item].id == idDel){
+          listItens.splice(item, 1);
+          break;
+        }
+      }
+      localStorage.setItem("taskListItens", JSON.stringify(listItens));
+      renderItens();
+    });
+
+    function renderItens(){
+      var panel = $(document.createElement('div'));
+      for (var item in listItens) {
+        var tmp = tmpItem[0].content;
+        tmp.querySelector(".texto").innerHTML = listItens[item].text
+        tmp.querySelector(".marcador").value = listItens[item].id
+        panel.append($(tmp).clone());
+      }
+      pnTask.empty();
+      pnTask.append(panel);
+    }
+  </script>
+</body>
+</html>
