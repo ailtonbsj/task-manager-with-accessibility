@@ -1,2 +1,2 @@
-# task-manager-with-accessibility
-Task Manager with accessibility for III Vale Web Livre
+# Task Manager with accessibility
+This app is for an workshop in the III Vale Web Livre
